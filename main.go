@@ -20,6 +20,8 @@ const (
 )
 
 func main() {
+	fmt.Println("[+] Starting packetengine-collect...")
+
 	// Automatically detect the active network interface
 	var ifaceName string
 	var err error
@@ -34,7 +36,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error detecting active network interface:", err)
 	}
-	fmt.Println("Using interface:", ifaceName)
+	fmt.Println("[+] Using interface:", ifaceName)
 
 	// Open the device for packet capture
 	handle, err := pcap.OpenLive(ifaceName, 1600, true, pcap.BlockForever)
@@ -61,7 +63,7 @@ func main() {
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 	packetSource.DecodeOptions.Lazy = true // Lazy decoding for better performance
 
-	fmt.Println("Starting DNS capture...")
+	fmt.Println("[+] Starting DNS capture...")
 
 	for packet := range packetSource.Packets() {
 		// Extract DNS layer from the packet
@@ -103,9 +105,9 @@ func postWorker(answersChan chan string, wg *sync.WaitGroup) {
 			postData := map[string]string{"answer": answer}
 			err := postJSON(postData)
 			if err != nil {
-				log.Println("Error sending DNS answer:", answer, err)
+				log.Println("[!] Error sending DNS answer:", answer, err)
 			} else {
-				fmt.Println("Successfully sent DNS answer:", answer)
+				fmt.Println("[+] Successfully sent DNS answer:", answer)
 			}
 		}(answer)
 	}
@@ -116,18 +118,18 @@ func postJSON(data map[string]string) error {
 	// Convert data to JSON
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		return fmt.Errorf("error marshalling data to JSON: %v", err)
+		return fmt.Errorf("[!] error marshalling data to JSON: %v", err)
 	}
 
 	// Make POST request
 	resp, err := http.Post(ingestURL, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-		return fmt.Errorf("error posting data: %v", err)
+		return fmt.Errorf("[!] error posting data: %v", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to send. Status code: %v", resp.StatusCode)
+		return fmt.Errorf("[!] failed to send. Status code: %v", resp.StatusCode)
 	}
 	return nil
 }
@@ -149,7 +151,7 @@ func getWindowsActiveInterface() (string, error) {
 			}
 		}
 	}
-	return "", fmt.Errorf("no active network interface found")
+	return "", fmt.Errorf("[!] no active network interface found")
 }
 
 // Function to get the active network interface for Unix-like systems
@@ -179,5 +181,5 @@ func getActiveInterface() (*net.Interface, error) {
 			}
 		}
 	}
-	return nil, fmt.Errorf("no active network interface found")
+	return nil, fmt.Errorf("[!] no active network interface found")
 }
