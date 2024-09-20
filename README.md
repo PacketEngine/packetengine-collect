@@ -16,7 +16,7 @@ To get started, you'll need a [PacketEngine account](https://packetengine.co.uk)
 Using `go install`:
 
 ```console
-go install -v github.com/PacketEngine/packetengine/packetengine-collect@latest
+go install -v github.com/PacketEngine/packetengine-collect@latest
 ```
 
 # Usage
