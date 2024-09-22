@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -113,7 +114,7 @@ func postWorker(answersChan chan string, wg *sync.WaitGroup) {
 	}
 }
 
-// Function to post data to a URL
+// Function to post data to a URL and print the response body
 func postJSON(data map[string]string) error {
 	// Convert data to JSON
 	jsonData, err := json.Marshal(data)
@@ -128,9 +129,20 @@ func postJSON(data map[string]string) error {
 	}
 	defer resp.Body.Close()
 
+	// Check for successful response status code
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("[!] failed to send. Status code: %v", resp.StatusCode)
 	}
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("[!] error reading response body: %v", err)
+	}
+
+	// Print the response body
+	fmt.Printf("[+] Response from server: %s\n", string(body))
+
 	return nil
 }
 
