@@ -1,7 +1,7 @@
 [![Build Status](https://github.com/PacketEngine/packetengine-collect/workflows/Go/badge.svg?branch=main)](https://github.com/PacketEngine/packetengine-collect/actions?query=branch%3Amain)
 [![Release](https://img.shields.io/github/release/PacketEngine/packetengine-collect.svg)](https://github.com/PacketEngine/packetengine-collect/releases)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/PacketEngine/packetengine-collect)
-[![Go Report Card](https://goreportcard.com/badge/github.com/PacketEngine/packetengine-collect)](https://goreportcard.com/report/github.com/PacketEngine/packetengine-collect)
+[![Go Report Card](https://goreportcard.com/badge/github.com/PacketEngine/packetengine-collect)](https://goreportcard.com/report/github.com/PacketEngine/packetengine-collect?1)
 ![GitHub](https://img.shields.io/github/license/PacketEngine/packetengine-collect)
 ![GitHub issues](https://img.shields.io/github/issues/PacketEngine/packetengine-collect)
 
