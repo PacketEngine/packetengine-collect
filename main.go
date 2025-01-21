@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"runtime"
+	"strings"
 	"sync"
 
 	"github.com/google/gopacket"
@@ -24,19 +25,19 @@ const (
 func main() {
 	fmt.Println("[+] Starting packetengine-collect...")
 
-	// Define the -iface flag
+	// Define the -iface flag and -whitelist flag
 	ifaceFlag := flag.String("iface", "", "Network interface to use (default: auto-detect)")
+	whitelistFlag := flag.String("whitelist", "", "Comma separated list of domains to whitelist")
 	flag.Parse()
 
 	var ifaceName string
 	var err error
 
+	// Handle interface selection
 	if *ifaceFlag != "" {
-		// Use the interface specified by the user
 		ifaceName = *ifaceFlag
 		fmt.Println("[+] Using specified interface:", ifaceName)
 	} else {
-		// Automatically detect the active network interface
 		fmt.Println("[+] Auto-detecting active network interface...")
 		if runtime.GOOS == "windows" {
 			ifaceName, err = getWindowsActiveInterface()
@@ -52,10 +53,17 @@ func main() {
 		fmt.Println("[+] Using interface:", ifaceName)
 	}
 
+	// Parse the whitelist flag if provided
+	var whitelist []string
+	if *whitelistFlag != "" {
+		whitelist = strings.Split(*whitelistFlag, ",")
+		fmt.Println("[+] Whitelist set to:", whitelist)
+	}
+
 	// Open the device for packet capture
 	handle, err := pcap.OpenLive(ifaceName, 1600, true, pcap.BlockForever)
 	if err != nil {
-		log.Fatal(err, "\nHint: Make sure you're running as root.")
+		log.Fatal(err, "\nHint: Make sure you're running as root and using a valid interface name.")
 	}
 	defer handle.Close()
 
@@ -93,6 +101,20 @@ func main() {
 			for _, answer := range dns.Answers {
 				answerName := string(answer.Name)
 				if answer.IP.String() != "<nil>" {
+					// If a whitelist is set, check if the answerName ends with one of the whitelist entries
+					if len(whitelist) > 0 {
+						matched := false
+						for _, domain := range whitelist {
+							if strings.HasSuffix(answerName, domain) {
+								matched = true
+								break
+							}
+						}
+						if !matched {
+							continue // Skip this answer if it doesn't match any whitelist suffix
+						}
+					}
+
 					// Check if the answer is already seen
 					if _, exists := uniqueAnswers[answerName]; !exists {
 						uniqueAnswers[answerName] = true
