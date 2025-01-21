@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-go@v5
       -
         name: Install dependencies
-        run: "sudo apt install -y libpcap-dev"
+        run: "sudo apt install -y libpcap-dev gcc-aarch64-linux-gnu"
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
