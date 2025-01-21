@@ -19,10 +19,28 @@ Using `go install`:
 go install -v github.com/PacketEngine/packetengine-collect@latest
 ```
 
-# Usage
+If you want to build it yourself:
+
+```console
+CGO_ENABLED=1 go build
+```
+
+To build for Windows you first need to install Npcap from https://npcap.com
+
+```console
+GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build
+```
+
+# Linux/MacOS Usage
 
 ```console
 sudo packetengine-collect
+```
+
+# Windows Usage
+
+```console
+packetengine.exe
 ```
 
 # License
