@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -23,21 +24,33 @@ const (
 func main() {
 	fmt.Println("[+] Starting packetengine-collect...")
 
-	// Automatically detect the active network interface
+	// Define the -iface flag
+	ifaceFlag := flag.String("iface", "", "Network interface to use (default: auto-detect)")
+	flag.Parse()
+
 	var ifaceName string
 	var err error
-	if runtime.GOOS == "windows" {
-		ifaceName, err = getWindowsActiveInterface()
-	} else {
-		var iface *net.Interface
-		iface, err = getActiveInterface()
-		ifaceName = iface.Name
-	}
 
-	if err != nil {
-		log.Fatal("Error detecting active network interface:", err)
+	if *ifaceFlag != "" {
+		// Use the interface specified by the user
+		ifaceName = *ifaceFlag
+		fmt.Println("[+] Using specified interface:", ifaceName)
+	} else {
+		// Automatically detect the active network interface
+		fmt.Println("[+] Auto-detecting active network interface...")
+		if runtime.GOOS == "windows" {
+			ifaceName, err = getWindowsActiveInterface()
+		} else {
+			var iface *net.Interface
+			iface, err = getActiveInterface()
+			ifaceName = iface.Name
+		}
+
+		if err != nil {
+			log.Fatal("Error detecting active network interface:", err)
+		}
+		fmt.Println("[+] Using interface:", ifaceName)
 	}
-	fmt.Println("[+] Using interface:", ifaceName)
 
 	// Open the device for packet capture
 	handle, err := pcap.OpenLive(ifaceName, 1600, true, pcap.BlockForever)
